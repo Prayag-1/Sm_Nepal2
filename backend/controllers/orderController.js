@@ -3,6 +3,7 @@ import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
 import { calcPrices } from '../utils/calcPrices.js';
 import { verifyPayPalPayment, checkIfNewTransaction } from '../utils/paypal.js';
+import mongoose from 'mongoose';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -140,6 +141,26 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Delete order
+// @route   DELETE /api/orders/:id
+// @access  Private/Admin
+const deleteOrder = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400);
+    throw new Error('Invalid order id');
+  }
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  res.status(405);
+  throw new Error('Order deletion is not supported');
+});
+
 // @desc    Get all orders
 // @route   GET /api/orders
 // @access  Private/Admin
@@ -154,5 +175,6 @@ export {
   getOrderById,
   updateOrderToPaid,
   updateOrderToDelivered,
+  deleteOrder,
   getOrders,
 };

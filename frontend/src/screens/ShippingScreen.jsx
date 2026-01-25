@@ -12,9 +12,7 @@ const ShippingScreen = () => {
 
   const [address, setAddress] = useState(shippingAddress.address || '');
   const [city, setCity] = useState(shippingAddress.city || '');
-  const [postalCode, setPostalCode] = useState(
-    shippingAddress.postalCode || ''
-  );
+  const [phone, setPhone] = useState(shippingAddress.phone || '');
   const [country, setCountry] = useState(shippingAddress.country || '');
 
   const dispatch = useDispatch();
@@ -22,7 +20,14 @@ const ShippingScreen = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(saveShippingAddress({ address, city, postalCode, country }));
+    const sanitizedPhone = phone.replace(/\D/g, '');
+    if (sanitizedPhone.length < 7 || sanitizedPhone.length > 15) {
+      return window.alert('Please enter a valid phone number (7-15 digits).');
+    }
+
+    dispatch(
+      saveShippingAddress({ address, city, phone: sanitizedPhone, country })
+    );
     navigate('/payment');
   };
 
@@ -53,14 +58,14 @@ const ShippingScreen = () => {
           ></Form.Control>
         </Form.Group>
 
-        <Form.Group className='my-2' controlId='postalCode'>
-          <Form.Label>Postal Code</Form.Label>
+        <Form.Group className='my-2' controlId='phone'>
+          <Form.Label>Phone Number</Form.Label>
           <Form.Control
-            type='text'
-            placeholder='Enter postal code'
-            value={postalCode}
+            type='tel'
+            placeholder='Enter phone number'
+            value={phone}
             required
-            onChange={(e) => setPostalCode(e.target.value)}
+            onChange={(e) => setPhone(e.target.value)}
           ></Form.Control>
         </Form.Group>
 

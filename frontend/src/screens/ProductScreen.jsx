@@ -21,6 +21,7 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
 import { addToCart } from '../slices/cartSlice';
+import BreadcrumbNav from '../components/BreadcrumbNav';
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
@@ -78,10 +79,35 @@ const ProductScreen = () => {
         </Message>
       ) : (
         <>
-          <Meta title={product.name} description={product.description} />
+          <Meta
+            title={product.seoTitle || product.name}
+            description={product.seoDescription || product.description}
+            keywords={
+              Array.isArray(product.seoKeywords)
+                ? product.seoKeywords.join(', ')
+                : product.seoKeywords
+            }
+          />
+          <BreadcrumbNav
+            items={[
+              product.category
+                ? {
+                    label: product.category.name,
+                    to: `/category/${product.category._id}`,
+                  }
+                : null,
+              product.subcategory
+                ? {
+                    label: product.subcategory.name,
+                    to: `/category/${product.category?._id}?subcategory=${product.subcategory._id}`,
+                  }
+                : null,
+              { label: product.name },
+            ].filter(Boolean)}
+          />
           <Row>
             <Col md={6}>
-              <Image src={product.image} alt={product.name} fluid />
+              <Image src={product.image} alt={product.name} fluid loading='lazy' />
             </Col>
             <Col md={3}>
               <ListGroup variant='flush'>
@@ -93,6 +119,15 @@ const ProductScreen = () => {
                     value={product.rating}
                     text={`${product.numReviews} reviews`}
                   />
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>Brand: </strong>
+                  {product.brand?.name || 'N/A'}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>Category: </strong>
+                  {product.category?.name || 'N/A'}
+                  {product.subcategory && ` › ${product.subcategory?.name}`}
                 </ListGroup.Item>
                 <ListGroup.Item>Price: ${product.price}</ListGroup.Item>
                 <ListGroup.Item>

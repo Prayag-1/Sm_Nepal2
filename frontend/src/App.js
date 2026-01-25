@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Container } from 'react-bootstrap';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { logout } from './slices/authSlice';
@@ -11,6 +11,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
 
   useEffect(() => {
     const expirationTime = localStorage.getItem('expirationTime');
@@ -28,9 +30,15 @@ const App = () => {
       <ToastContainer />
       <Header />
       <main className='py-3'>
-        <Container>
-          <Outlet />
-        </Container>
+        {isAdminPath ? (
+          <div className='admin-main'>
+            <Outlet />
+          </div>
+        ) : (
+          <Container>
+            <Outlet />
+          </Container>
+        )}
       </main>
       <Footer />
     </>

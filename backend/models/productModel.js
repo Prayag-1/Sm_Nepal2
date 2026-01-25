@@ -32,12 +32,19 @@ const productSchema = mongoose.Schema(
       required: true,
     },
     brand: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Brand',
       required: true,
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
+    },
+    subcategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      default: null,
     },
     description: {
       type: String,
@@ -48,6 +55,10 @@ const productSchema = mongoose.Schema(
       type: Number,
       required: true,
       default: 0,
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
     },
     numReviews: {
       type: Number,
@@ -64,6 +75,9 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
+    seoTitle: { type: String, default: '' },
+    seoDescription: { type: String, default: '' },
+    seoKeywords: [{ type: String }],
   },
   {
     timestamps: true,

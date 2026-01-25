@@ -1,9 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 
 const Meta = ({ title, description, keywords }) => {
+  const pageTitle =
+    title && !title.includes('Surgical Mart Nepal')
+      ? `${title} | Surgical Mart Nepal`
+      : title;
+
   return (
     <Helmet>
-      <title>{title}</title>
+      <title>{pageTitle}</title>
       <meta name='description' content={description} />
       <meta name='keyword' content={keywords} />
     </Helmet>
@@ -11,9 +16,10 @@ const Meta = ({ title, description, keywords }) => {
 };
 
 Meta.defaultProps = {
-  title: 'Welcome To ProShop',
-  description: 'We sell the best products for cheap',
-  keywords: 'electronics, buy electronics, cheap electroincs',
+  title: 'Surgical Mart Nepal | Medical Supplies',
+  description:
+    'Trusted medical and surgical supplies for clinics, hospitals, and caregivers across Nepal.',
+  keywords: 'medical supplies Nepal, surgical equipment, hospital essentials',
 };
 
 export default Meta;

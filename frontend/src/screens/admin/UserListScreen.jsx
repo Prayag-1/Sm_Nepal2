@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
 import Message from '../../components/Message';
@@ -9,20 +9,27 @@ import {
 } from '../../slices/usersApiSlice';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const UserListScreen = () => {
   const { data: users, refetch, isLoading, error } = useGetUsersQuery();
 
   const [deleteUser] = useDeleteUserMutation();
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const deleteHandler = async (id) => {
-    if (window.confirm('Are you sure')) {
-      try {
-        await deleteUser(id);
-        refetch();
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
+    setPendingDelete(id);
+  };
+
+  const confirmDelete = async () => {
+    const id = pendingDelete;
+    setPendingDelete(null);
+    if (!id) return;
+    try {
+      await deleteUser(id);
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
     }
   };
 
@@ -73,21 +80,28 @@ const UserListScreen = () => {
                       >
                         <FaEdit />
                       </Button>
-                      <Button
-                        variant='danger'
-                        className='btn-sm'
-                        onClick={() => deleteHandler(user._id)}
-                      >
-                        <FaTrash style={{ color: 'white' }} />
-                      </Button>
-                    </>
-                  )}
+                    <Button
+                      variant='danger'
+                      className='btn-sm'
+                      onClick={() => deleteHandler(user._id)}
+                    >
+                      <FaTrash style={{ color: 'white' }} />
+                    </Button>
+                  </>
+                )}
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
       )}
+      <ConfirmDialog
+        show={!!pendingDelete}
+        title='Confirm Delete'
+        message='Are you sure you want to delete this user?'
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </>
   );
 };

@@ -19,10 +19,12 @@ const PlaceOrderScreen = () => {
   useEffect(() => {
     if (!cart.shippingAddress.address) {
       navigate('/shipping');
+    } else if (!cart.shippingAddress.phone) {
+      navigate('/shipping');
     } else if (!cart.paymentMethod) {
       navigate('/payment');
     }
-  }, [cart.paymentMethod, cart.shippingAddress.address, navigate]);
+  }, [cart.paymentMethod, cart.shippingAddress.address, cart.shippingAddress.phone, navigate]);
 
   const dispatch = useDispatch();
   const placeOrderHandler = async () => {
@@ -53,16 +55,23 @@ const PlaceOrderScreen = () => {
               <h2>Shipping</h2>
               <p>
                 <strong>Address:</strong>
-                {cart.shippingAddress.address}, {cart.shippingAddress.city}{' '}
-                {cart.shippingAddress.postalCode},{' '}
+                {cart.shippingAddress.address}, {cart.shippingAddress.city},{' '}
                 {cart.shippingAddress.country}
+              </p>
+              <p>
+                <strong>Phone:</strong> {cart.shippingAddress.phone}
               </p>
             </ListGroup.Item>
 
             <ListGroup.Item>
               <h2>Payment Method</h2>
-              <strong>Method: </strong>
-              {cart.paymentMethod}
+              <p className='mb-0'>
+                <strong>Method: </strong>
+                Cash on Delivery
+              </p>
+              <small className='text-muted'>
+                Pay when your order arrives. Please have the exact amount ready.
+              </small>
             </ListGroup.Item>
 
             <ListGroup.Item>
@@ -102,12 +111,20 @@ const PlaceOrderScreen = () => {
         <Col md={4}>
           <Card>
             <ListGroup variant='flush'>
-              <ListGroup.Item>
-                <h2>Order Summary</h2>
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <Row>
-                  <Col>Items</Col>
+            <ListGroup.Item>
+              <h2>Order Summary</h2>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Row>
+                <Col>Status</Col>
+                <Col className='text-end'>
+                  <span className='badge bg-info text-dark'>COD Pending</span>
+                </Col>
+              </Row>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Row>
+                <Col>Items</Col>
                   <Col>${cart.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>

@@ -26,7 +26,11 @@ const LoginScreen = () => {
 
   useEffect(() => {
     if (userInfo) {
-      navigate(redirect);
+      if (userInfo.isAdmin) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate(redirect);
+      }
     }
   }, [navigate, redirect, userInfo]);
 
@@ -35,7 +39,11 @@ const LoginScreen = () => {
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({ ...res }));
-      navigate(redirect);
+      if (res.isAdmin) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate(redirect);
+      }
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }

@@ -1,9 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { updateCart } from '../utils/cartUtils';
 
+const defaultState = {
+  cartItems: [],
+  shippingAddress: {},
+  paymentMethod: 'COD',
+};
+
 const initialState = localStorage.getItem('cart')
-  ? JSON.parse(localStorage.getItem('cart'))
-  : { cartItems: [], shippingAddress: {}, paymentMethod: 'PayPal' };
+  ? { ...JSON.parse(localStorage.getItem('cart')), paymentMethod: 'COD' }
+  : defaultState;
 
 const cartSlice = createSlice({
   name: 'cart',
@@ -44,7 +50,7 @@ const cartSlice = createSlice({
     },
     // NOTE: here we need to reset state for when a user logs out so the next
     // user doesn't inherit the previous users cart and shipping
-    resetCart: (state) => (state = initialState),
+    resetCart: (state) => (state = defaultState),
   },
 });
 

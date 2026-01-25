@@ -1,4 +1,4 @@
-import { Table, Button, Row, Col } from 'react-bootstrap';
+import { Table, Button, Row, Col, Badge } from 'react-bootstrap';
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 import Message from '../../components/Message';
@@ -10,6 +10,8 @@ import {
   useCreateProductMutation,
 } from '../../slices/productsApiSlice';
 import { toast } from 'react-toastify';
+import { useState } from 'react';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const ProductListScreen = () => {
   const { pageNumber } = useParams();
@@ -20,29 +22,38 @@ const ProductListScreen = () => {
 
   const [deleteProduct, { isLoading: loadingDelete }] =
     useDeleteProductMutation();
+  const [createProduct, { isLoading: loadingCreate }] =
+    useCreateProductMutation();
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingCreate, setPendingCreate] = useState(false);
 
   const deleteHandler = async (id) => {
-    if (window.confirm('Are you sure')) {
-      try {
-        await deleteProduct(id);
-        refetch();
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
+    setPendingDelete(id);
+  };
+
+  const createProductHandler = async () => {
+    setPendingCreate(true);
+  };
+
+  const confirmCreate = async () => {
+    setPendingCreate(false);
+    try {
+      await createProduct();
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
     }
   };
 
-  const [createProduct, { isLoading: loadingCreate }] =
-    useCreateProductMutation();
-
-  const createProductHandler = async () => {
-    if (window.confirm('Are you sure you want to create a new product?')) {
-      try {
-        await createProduct();
-        refetch();
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
+  const confirmDelete = async () => {
+    const id = pendingDelete;
+    setPendingDelete(null);
+    if (!id) return;
+    try {
+      await deleteProduct(id);
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
     }
   };
 
@@ -59,8 +70,7 @@ const ProductListScreen = () => {
         </Col>
       </Row>
 
-      {loadingCreate && <Loader />}
-      {loadingDelete && <Loader />}
+      {(loadingCreate || loadingDelete) && <Loader />}
       {isLoading ? (
         <Loader />
       ) : error ? (
@@ -75,6 +85,7 @@ const ProductListScreen = () => {
                 <th>PRICE</th>
                 <th>CATEGORY</th>
                 <th>BRAND</th>
+                <th>STOCK</th>
                 <th></th>
               </tr>
             </thead>
@@ -84,8 +95,21 @@ const ProductListScreen = () => {
                   <td>{product._id}</td>
                   <td>{product.name}</td>
                   <td>${product.price}</td>
-                  <td>{product.category}</td>
-                  <td>{product.brand}</td>
+                  <td>
+                    {typeof product.category === 'object'
+                      ? product.category?.name
+                      : product.category}
+                  </td>
+                  <td>
+                    {typeof product.brand === 'object'
+                      ? product.brand?.name
+                      : product.brand}
+                  </td>
+                  <td>
+                    <Badge bg={product.countInStock > 0 ? 'success' : 'secondary'}>
+                      {product.countInStock > 0 ? 'In Stock' : 'Out'}
+                    </Badge>
+                  </td>
                   <td>
                     <Button
                       as={Link}
@@ -110,6 +134,21 @@ const ProductListScreen = () => {
           <Paginate pages={data.pages} page={data.page} isAdmin={true} />
         </>
       )}
+      <ConfirmDialog
+        show={pendingCreate}
+        title='Create Product'
+        message='Create a new product using defaults?'
+        onConfirm={confirmCreate}
+        onCancel={() => setPendingCreate(false)}
+        confirmVariant='primary'
+      />
+      <ConfirmDialog
+        show={!!pendingDelete}
+        title='Confirm Delete'
+        message='Are you sure you want to delete this product?'
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </>
   );
 };

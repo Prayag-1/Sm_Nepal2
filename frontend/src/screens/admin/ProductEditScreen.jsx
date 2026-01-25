@@ -10,6 +10,8 @@ import {
   useUpdateProductMutation,
   useUploadProductImageMutation,
 } from '../../slices/productsApiSlice';
+import { useGetCategoriesQuery } from '../../slices/categoriesApiSlice';
+import { useGetBrandsQuery } from '../../slices/brandsApiSlice';
 
 const ProductEditScreen = () => {
   const { id: productId } = useParams();
@@ -19,8 +21,13 @@ const ProductEditScreen = () => {
   const [image, setImage] = useState('');
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
   const [countInStock, setCountInStock] = useState(0);
   const [description, setDescription] = useState('');
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoKeywords, setSeoKeywords] = useState('');
 
   const {
     data: product,
@@ -35,6 +42,9 @@ const ProductEditScreen = () => {
   const [uploadProductImage, { isLoading: loadingUpload }] =
     useUploadProductImageMutation();
 
+  const { data: categories } = useGetCategoriesQuery();
+  const { data: brands } = useGetBrandsQuery();
+
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
@@ -47,8 +57,13 @@ const ProductEditScreen = () => {
         image,
         brand,
         category,
+        subcategory: subcategory || null,
         description,
         countInStock,
+        isFeatured,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
       }).unwrap(); // NOTE: here we need to unwrap the Promise to catch any rejection in our catch block
       toast.success('Product updated');
       refetch();
@@ -63,10 +78,17 @@ const ProductEditScreen = () => {
       setName(product.name);
       setPrice(product.price);
       setImage(product.image);
-      setBrand(product.brand);
-      setCategory(product.category);
+      setBrand(product.brand?._id || product.brand);
+      setCategory(product.category?._id || product.category);
+      setSubcategory(product.subcategory?._id || '');
       setCountInStock(product.countInStock);
       setDescription(product.description);
+      setIsFeatured(!!product.isFeatured);
+      setSeoTitle(product.seoTitle || '');
+      setSeoDescription(product.seoDescription || '');
+      setSeoKeywords(
+        Array.isArray(product.seoKeywords) ? product.seoKeywords.join(', ') : product.seoKeywords || ''
+      );
     }
   }, [product]);
 
@@ -88,7 +110,7 @@ const ProductEditScreen = () => {
         Go Back
       </Link>
       <FormContainer>
-        <h1>Edit Product</h1>
+        <h1 className='mb-4'>Edit Product</h1>
         {loadingUpdate && <Loader />}
         {isLoading ? (
           <Loader />
@@ -134,12 +156,18 @@ const ProductEditScreen = () => {
 
             <Form.Group controlId='brand'>
               <Form.Label>Brand</Form.Label>
-              <Form.Control
-                type='text'
-                placeholder='Enter brand'
+              <Form.Select
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-              ></Form.Control>
+                required
+              >
+                <option value=''>Select brand</option>
+                {(brands || []).map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.name}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
 
             <Form.Group controlId='countInStock'>
@@ -154,12 +182,44 @@ const ProductEditScreen = () => {
 
             <Form.Group controlId='category'>
               <Form.Label>Category</Form.Label>
-              <Form.Control
-                type='text'
-                placeholder='Enter category'
+              <Form.Select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              ></Form.Control>
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setSubcategory('');
+                }}
+                required
+              >
+                <option value=''>Select category</option>
+                {(categories || [])
+                  .filter((cat) => !cat.parentCategory)
+                  .map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group controlId='subcategory'>
+              <Form.Label>Subcategory (optional)</Form.Label>
+              <Form.Select
+                value={subcategory}
+                onChange={(e) => setSubcategory(e.target.value)}
+              >
+                <option value=''>None</option>
+                {(categories || [])
+                  .filter(
+                    (cat) =>
+                      cat.parentCategory &&
+                      cat.parentCategory.toString() === category?.toString()
+                  )
+                  .map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
+              </Form.Select>
             </Form.Group>
 
             <Form.Group controlId='description'>
@@ -170,6 +230,51 @@ const ProductEditScreen = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></Form.Control>
+            </Form.Group>
+
+            <hr />
+            <h5 className='mt-3'>SEO Settings</h5>
+            <Form.Text className='text-muted mb-2 d-block'>
+              Optional: helps search engines with better titles and descriptions.
+            </Form.Text>
+            <Form.Group controlId='seoTitle'>
+              <Form.Label>Meta Title</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Optional SEO title'
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId='seoDescription'>
+              <Form.Label>Meta Description</Form.Label>
+              <Form.Control
+                as='textarea'
+                rows={3}
+                placeholder='Optional ~160 characters'
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId='seoKeywords'>
+              <Form.Label>Meta Keywords</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Comma separated keywords'
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId='isFeatured' className='mt-3'>
+              <Form.Check
+                type='checkbox'
+                label="Mark as Today's Deal"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+              />
             </Form.Group>
 
             <Button
