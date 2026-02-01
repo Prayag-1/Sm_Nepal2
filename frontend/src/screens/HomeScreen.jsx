@@ -29,6 +29,8 @@ const HomeScreen = () => {
   const { data: brands } = useGetBrandsQuery();
   const { data: featured } = useGetFeaturedProductsQuery();
   const { data: settings } = useGetSettingsQuery();
+  const popularCategories =
+    (categories || []).filter((cat) => !cat.parentCategory).slice(0, 12);
 
   const handleFilterChange = (type, value) => {
     const params = new URLSearchParams(searchParams);
@@ -53,58 +55,62 @@ const HomeScreen = () => {
         </div>
       )}
 
-      <div className='hero wide-hero'>
-        <div className='content-container hero-inner'>
-          <div>
-            <p className='eyebrow'>{settings?.tagline || 'Trusted Medical Supply Hub'}</p>
-            <h1>{settings?.siteName || 'Surgical Mart Nepal'}</h1>
-            <p className='lead'>
-              {settings?.homepageNote ||
-                'Clinician-grade equipment, consumables, and rehabilitation support delivered with care across Nepal.'}
-            </p>
-            <div className='d-flex flex-wrap gap-2'>
-              <Button
-                variant='primary'
-                as={Link}
-                to={selectedCategory ? `/category/${selectedCategory}` : '/'}
-              >
-                Shop Now
-              </Button>
-              {categories && categories.length > 0 && (
-                <Button
-                  variant='outline-primary'
-                  as={Link}
-                  to={`/category/${
-                    categories.find((cat) => !cat.parentCategory)?._id ||
-                    categories[0]._id
-                  }`}
-                >
-                  Browse Categories
-                </Button>
-              )}
-            </div>
+      {/* Hero */}
+      <section className='home-hero fade-in'>
+        <div className='home-hero__copy'>
+          <div className='promo-pill'>
+            <span className='promo-dot' />
+            {settings?.promoText || 'Your trusted partner for medical supplies'}
           </div>
-          <div className='hero-stats'>
-            <div>
-              <span className='stat-number'>24/7</span>
-              <p>Order Support</p>
-            </div>
-            <div>
-              <span className='stat-number'>+50</span>
-              <p>Trusted Brands</p>
-            </div>
-            <div>
-              <span className='stat-number'>Nepal</span>
-              <p>Nationwide Delivery</p>
-            </div>
+          <p className='eyebrow mb-2'>{settings?.tagline || 'Medical procurement, simplified'}</p>
+          <h1 className='hero-title'>
+            {settings?.siteName || 'Surgical Mart Nepal'}
+          </h1>
+          <p className='hero-subtitle'>
+            {settings?.homepageNote ||
+              'Trusted medical supplies for hospitals, clinics, and care teams across Nepal.'}
+          </p>
+          <div className='hero-cta-row'>
+            <Button as={Link} to='/' variant='primary' size='lg' className='btn-cta'>
+              Shop Medical Equipment
+            </Button>
+            <Button
+              as={Link}
+              to={`/category/${
+                categories?.find((cat) => !cat.parentCategory)?._id || categories?.[0]?._id || ''
+              }`}
+              variant='outline-light'
+              size='lg'
+              className='btn-ghost'
+            >
+              Browse Categories
+            </Button>
+          </div>
+          <div className='hero-trust'>
+            <div className='trust-chip'>Hospitals & Clinics</div>
+            <div className='trust-chip'>Genuine Brands</div>
+            <div className='trust-chip'>Nationwide Delivery</div>
           </div>
         </div>
-      </div>
+        <div className='home-hero__visual'>
+          <div className='hero-card'>
+            <div className='hero-card__badge'>Premium</div>
+            <div className='hero-card__title'>Hospital-grade devices</div>
+            <div className='hero-card__meta'>Sterile •  certified Products • Ready to ship</div>
+            <div className='hero-card__cta'>Explore inventory →</div>
+          </div>
+          <div className='hero-illus' aria-hidden='true'>
+            <div className='illus-pill illus-pill--1' />
+            <div className='illus-pill illus-pill--2' />
+            <div className='illus-pill illus-pill--3' />
+          </div>
+        </div>
+      </section>
 
       <div className='content-container'>
-        <section className='section-block filters mb-4'>
-          <Row>
-            <Col md={4} className='mb-2'>
+        <section className='section-block filters mb-4 fade-in'>
+          <div className='filter-card'>
+            <div className='filter-field'>
               <Form.Select
                 value={selectedCategory}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
@@ -118,8 +124,8 @@ const HomeScreen = () => {
                     </option>
                   ))}
               </Form.Select>
-            </Col>
-            <Col md={4} className='mb-2'>
+            </div>
+            <div className='filter-field'>
               <Form.Select
                 value={selectedBrand}
                 onChange={(e) => handleFilterChange('brand', e.target.value)}
@@ -131,17 +137,47 @@ const HomeScreen = () => {
                   </option>
                 ))}
               </Form.Select>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </section>
 
-        <section className='section-block'>
-          <div className='section-header'>
-            <h2>Today&apos;s Deals</h2>
-            <p>Handpicked medical essentials ready to ship.</p>
+        {/* Featured categories - fast scan */}
+        <section className='section-block fade-in'>
+          <div className='section-header section-header--split'>
+            <div>
+              <h2>Featured Categories</h2>
+              <p>Most-searched equipment and supplies this week.</p>
+            </div>
+            <Button as={Link} to='/categories' variant='outline-primary' size='sm'>
+              View all categories
+            </Button>
+          </div>
+          <div className='category-scroll'>
+            {popularCategories.map((cat, idx) => (
+              <Link key={cat._id} to={`/category/${cat._id}`} className='category-card-premium'>
+                <div className='category-card__top'>
+                  <div className='category-thumb-ghost'>{cat.name?.[0] || '?'}</div>
+                  <span className='category-chip'>{idx < 3 ? 'Top selling' : 'Popular'}</span>
+                </div>
+                <div className='category-card__name text-truncate'>{cat.name}</div>
+                <span className='category-card__cta'>Browse →</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className='section-block fade-in'>
+          <div className='section-header section-header--split'>
+            <div>
+              <h2>Today&apos;s Deals</h2>
+              <p>Handpicked medical essentials ready to ship.</p>
+            </div>
+            <Button as={Link} to='/' variant='outline-primary' size='sm'>
+              View all deals
+            </Button>
           </div>
           {featured && featured.length > 0 ? (
-            <Row>
+            <Row className='g-3 product-grid'>
               {featured.map((product) => (
                 <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
                   <Product product={product} />
@@ -153,65 +189,75 @@ const HomeScreen = () => {
           )}
         </section>
 
-        <section className='section-block' id='brands'>
-          <div className='section-header text-center mb-3'>
-            <h2>Popular Brands</h2>
-            <p className='mb-0'>Trusted manufacturers and partners across Nepal.</p>
+        <section className='section-block fade-in' id='categories'>
+          <div className='section-header mb-3'>
+            <h2>Shop by Category</h2>
+            <p>Discover equipment and consumables organized for quick decisions.</p>
           </div>
-          <div className='brand-card-grid'>
+          <div className='category-grid'>
+            {(categories || [])
+              .filter((cat) => !cat.parentCategory)
+              .map((cat) => (
+                <Link
+                  key={cat._id}
+                  to={`/category/${cat._id}`}
+                  className='category-tile'
+                >
+                  <div className='category-icon'>{cat.name?.[0] || '?'}</div>
+                  <div className='category-name text-truncate'>{cat.name}</div>
+                  <span className='category-cta'>View items →</span>
+                </Link>
+              ))}
+          </div>
+        </section>
+
+        <section className='section-block fade-in' id='brands'>
+          <div className='section-header section-header--center mb-3'>
+            <h2>Trusted Brands</h2>
+            <p className='mb-0'>Partnered with leading manufacturers across Nepal and beyond.</p>
+          </div>
+          <div className='brand-ribbon'>
             {(brands || []).map((brand) => (
               <Link
                 key={brand._id}
                 to={`/brand/${brand._id}`}
-                className='brand-card text-center text-decoration-none'
+                className='brand-chip text-decoration-none'
               >
-                <div className='brand-card-img'>
-                  {brand.image || brand.logo ? (
-                    <img src={brand.image || brand.logo} alt={brand.name} loading='lazy' />
-                  ) : (
-                    <span className='brand-initial'>{brand.name?.[0] || '?'}</span>
-                  )}
-                </div>
-                <div className='text-muted small mt-2'>{brand.name}</div>
+                {brand.image || brand.logo ? (
+                  <img src={brand.image || brand.logo} alt={brand.name} loading='lazy' />
+                ) : (
+                  <span className='brand-initial'>{brand.name?.[0] || '?'}</span>
+                )}
+                <span>{brand.name}</span>
               </Link>
             ))}
           </div>
           <div className='text-center mt-3'>
-            <Button as={Link} to='/?view=brands' variant='outline-primary'>
-              View All Brands &rarr;
+            <Button as={Link} to='/brands' variant='outline-primary' size='sm'>
+              View all brands
             </Button>
           </div>
         </section>
 
-        <section className='section-block' id='categories'>
+        <section className='section-block fade-in trust-panel'>
           <div className='section-header mb-3'>
-            <h2>Medical Categories</h2>
-            <p>Discover our range of medical supplies and equipment organized by specialty.</p>
+            <h2>Why Surgical Mart Nepal?</h2>
+            <p>Built for hospitals, clinics, labs, and pharmacies that need reliable supply.</p>
           </div>
-          <Row className='g-3 category-card-grid'>
-            {(categories || [])
-              .filter((cat) => !cat.parentCategory)
-              .map((cat) => (
-                <Col key={cat._id} xs={6} sm={4} md={3} lg={3} xl={2}>
-                  <Card className='category-card h-100 text-center'>
-                    <Card.Body className='py-3 d-flex flex-column justify-content-center'>
-                      <Card.Title className='fs-6 text-uppercase text-truncate mb-2'>
-                        {cat.name}
-                      </Card.Title>
-                      <Button
-                        as={Link}
-                        to={`/category/${cat._id}`}
-                        variant='light'
-                        className='border-0 border-top'
-                        size='sm'
-                      >
-                        View
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-          </Row>
+          <div className='trust-grid'>
+            <div className='trust-card'>
+              <h5>Clinical-grade catalog</h5>
+              <p>Curated inventory from certified suppliers with documentation on request.</p>
+            </div>
+            <div className='trust-card'>
+              <h5>Procurement made simple</h5>
+              <p>Transparent pricing, fast reordering, and expert support when you need it.</p>
+            </div>
+            <div className='trust-card'>
+              <h5>Nationwide logistics</h5>
+              <p>Cold-chain aware delivery partners covering major cities and remote regions.</p>
+            </div>
+          </div>
         </section>
       </div>
     </>

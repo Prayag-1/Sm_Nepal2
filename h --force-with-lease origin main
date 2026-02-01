@@ -1,0 +1,17 @@
+* [33m53ed9f9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Initial commit
+* [33me23e3a8[m remove emoji
+* [33m30b6136[m doc: generate toc
+*   [33m6847635[m Merge branch 'removeLinkContainer'
+[32m|[m[33m\[m  
+[32m|[m * [33m0d824e4[m remove react-router-bootstrap
+[32m|[m * [33m4e83d74[m use Link with 'as' prop instead of LinkContainer in Header
+* [33m|[m [33m63b0b9a[m Update readme.md
+[33m|[m[33m/[m  
+* [33m3264860[m remove quotes on link
+* [33me7b228d[m clear cookie instead of setting as empty string
+* [33m5626b28[m doc: correct links to repo files
+* [33m2e3eb75[m remove unused property
+* [33m90eada6[m doc: fix broken image link after last commit
+* [33mf92b942[m doc: absolute paths for links to files
+* [33m5b8411a[m calculate prices in whole numbers
+* [33m960f754[m ignore api tests

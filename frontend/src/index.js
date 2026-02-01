@@ -10,6 +10,7 @@ import {
   createRoutesFromElements,
   Route,
   RouterProvider,
+  Navigate,
 } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import PrivateRoute from './components/PrivateRoute';
@@ -36,6 +37,7 @@ import CategoryListScreen from './screens/admin/CategoryListScreen';
 import BrandListScreen from './screens/admin/BrandListScreen';
 import CategoryScreen from './screens/CategoryScreen';
 import BrandScreen from './screens/BrandScreen';
+import BrandsListScreen from './screens/BrandsListScreen';
 import AboutScreen from './screens/AboutScreen';
 import ContactScreen from './screens/ContactScreen';
 import BannerListScreen from './screens/admin/BannerListScreen';
@@ -67,6 +69,7 @@ const router = createBrowserRouter(
         <Route path='/about' element={<AboutScreen />} />
         <Route path='/contact' element={<ContactScreen />} />
         <Route path='/brand/:brandId' element={<BrandScreen />} />
+        <Route path='/brands' element={<BrandsListScreen />} />
         <Route path='/tutorials' element={<TutorialsScreen />} />
         <Route path='/login' element={<LoginScreen />} />
         <Route path='/register' element={<RegisterScreen />} />
@@ -82,6 +85,7 @@ const router = createBrowserRouter(
 
       <Route path='/admin' element={<AdminRoute />}>
         <Route element={<AdminLayout />}>
+          <Route index element={<Navigate to='dashboard' replace />} />
           <Route path='dashboard' element={<AdminDashboard />} />
           <Route path='orderlist' element={<OrderListScreen />} />
           <Route path='productlist' element={<ProductListScreen />} />

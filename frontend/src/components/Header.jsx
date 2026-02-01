@@ -1,5 +1,5 @@
-import { Navbar, Nav, Container, NavDropdown, Badge, Form, Button } from 'react-bootstrap';
-import { FaShoppingCart, FaUser, FaGlobe, FaSearch } from 'react-icons/fa';
+import { Navbar, Nav, Container, NavDropdown, Badge, Button } from 'react-bootstrap';
+import { FaShoppingCart, FaUser, FaSearch, FaEnvelope, FaPhoneAlt, FaBars } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLogoutMutation } from '../slices/usersApiSlice';
@@ -10,10 +10,12 @@ import { resetCart } from '../slices/cartSlice';
 import { useGetCategoriesQuery } from '../slices/categoriesApiSlice';
 import ConfirmDialog from './ConfirmDialog';
 import { useState, useRef } from 'react';
+import { useGetSettingsQuery } from '../slices/contactApiSlice';
 
 const Header = () => {
   const { cartItems } = useSelector((state) => state.cart);
   const { userInfo } = useSelector((state) => state.auth);
+  const { data: settings } = useGetSettingsQuery();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -38,53 +40,89 @@ const Header = () => {
 
   return (
     <header className='mc-header'>
+      <div className='top-utility-bar'>
+        <Container fluid className='top-utility-inner'>
+          <span>Nationwide delivery across Nepal</span>
+          <span>Bulk orders & institutional supply</span>
+          <Link to='/contact' className='top-utility-link'>
+            Support / Contact
+          </Link>
+        </Container>
+      </div>
       <div className='header-utility'>
-        <Container className='d-flex justify-content-end align-items-center utility-inner'>
-          <Form.Select size='sm' className='utility-lang' aria-label='Language selector'>
-            <option>EN</option>
-          </Form.Select>
-          <Button
-            variant='link'
-            className='utility-icon'
-            onClick={() => searchInputRef.current?.focus()}
-            aria-label='Search'
-          >
-            <FaSearch />
-          </Button>
-          {userInfo ? (
-            <Button
-              variant='link'
-              className='utility-icon'
-              onClick={() => setShowLogoutConfirm(true)}
-              aria-label='Account'
-            >
-              <FaUser />
-            </Button>
-          ) : (
-            <Nav.Link as={Link} to='/login' className='utility-icon'>
-              <FaUser />
+        <Container fluid className='header-top-row'>
+          <div className='d-flex align-items-center gap-3 brand-left'>
+            <Link to='/' className='brand-identity text-decoration-none'>
+              <div className='brand-mark'>
+                <img src={logo} alt='Surgical Mart Nepal logo' className='brand-logo' />
+              </div>
+              <div className='brand-copy'>
+                <span className='fw-semibold brand-text text-white'>Surgical Mart Nepal</span>
+                <small className='brand-subtext'>
+                  {settings?.tagline || 'Medical supply partners for Nepal'}
+                </small>
+              </div>
+            </Link>
+          </div>
+
+          <div className='header-search-wrap'>
+            <SearchBox inputRef={searchInputRef} />
+          </div>
+
+          <div className='d-flex align-items-center header-actions'>
+            {userInfo ? (
+              <NavDropdown
+                title={<span className='header-profile-label'>{userInfo.name}</span>}
+                id='username'
+                align='end'
+                menuVariant='dark'
+              >
+                <NavDropdown.Item as={Link} to='/profile'>
+                  Profile
+                </NavDropdown.Item>
+                <NavDropdown.Item onClick={() => setShowLogoutConfirm(true)}>
+                  Logout
+                </NavDropdown.Item>
+              </NavDropdown>
+            ) : (
+              <Nav.Link as={Link} to='/login' className='header-profile'>
+                <div className='profile-icon'>
+                  <FaUser />
+                </div>
+                <div className='profile-text'>
+                  <span className='profile-title'>Sign In</span>
+                  <small>Login / Register</small>
+                </div>
+              </Nav.Link>
+            )}
+
+            <Nav.Link as={Link} to='/cart' className='header-cart'>
+              <FaShoppingCart />
+              {cartItems.length > 0 && (
+                <Badge pill bg='light' text='dark' className='ms-1'>
+                  {cartItems.reduce((a, c) => a + c.qty, 0)}
+                </Badge>
+              )}
             </Nav.Link>
-          )}
+          </div>
         </Container>
       </div>
 
-      <Navbar bg='primary' variant='dark' expand='lg' collapseOnSelect className='elevated-nav sticky-nav'>
-        <Container className='justify-content-between'>
-          <Navbar.Brand
-            as={Link}
-            to='/'
-            className='d-flex align-items-center gap-3 brand-left nav-brand-compact'
-          >
-            <img src={logo} alt='Surgical Mart Nepal logo' className='brand-logo' />
-            <span className='fw-semibold text-white'>Surgical Mart Nepal</span>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls='primary-nav' />
+      <Navbar
+        bg='dark'
+        variant='dark'
+        expand='lg'
+        collapseOnSelect
+        className='subnav-bar sticky-nav mc-nav-bar'
+      >
+        <Container fluid className='subnav-inner'>
+          <div className='d-flex align-items-center gap-2'>
+            <FaBars className='text-light' />
+            <Navbar.Toggle aria-controls='primary-nav' />
+          </div>
           <Navbar.Collapse id='primary-nav'>
-            <Nav className='mx-auto primary-nav'>
-              <Nav.Link as={Link} to='/'>
-                Products
-              </Nav.Link>
-              <NavDropdown title='Categories' id='categories-dropdown' menuVariant='light'>
+            <Nav className='subnav-links'>
+              <NavDropdown title='Categories' id='categories-dropdown' menuVariant='dark' className='mc-nav-link'>
                 {(categories || [])
                   .filter((cat) => !cat.parentCategory)
                   .map((cat) => (
@@ -93,54 +131,26 @@ const Header = () => {
                     </NavDropdown.Item>
                   ))}
               </NavDropdown>
-              <Nav.Link as={Link} to='/?view=brands'>
+              <Nav.Link as={Link} to='/' className='mc-nav-link'>
+                Products
+              </Nav.Link>
+              <Nav.Link as={Link} to='/brands' className='mc-nav-link'>
                 Brands
               </Nav.Link>
               {userInfo?.isAdmin && (
-                <Nav.Link as={Link} to='/admin/orderlist'>
+                <Nav.Link as={Link} to='/admin/orderlist' className='mc-nav-link'>
                   Orders
                 </Nav.Link>
               )}
-              <Nav.Link as={Link} to='/about'>
+              <Nav.Link as={Link} to='/about' className='mc-nav-link'>
                 About
               </Nav.Link>
-              <Nav.Link as={Link} to='/tutorials'>
+              <Nav.Link as={Link} to='/tutorials' className='mc-nav-link'>
                 Resources
               </Nav.Link>
-              <NavDropdown title='More' id='more-menu' menuVariant='light'>
-                <NavDropdown.Item as={Link} to='/contact'>
-                  Contact
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to='/cart'>
-                  Cart
-                </NavDropdown.Item>
-              </NavDropdown>
-            </Nav>
-            <Nav className='align-items-center gap-3'>
-              <SearchBox inputRef={searchInputRef} />
-              <Nav.Link as={Link} to='/cart' className='nav-cart'>
-                <FaShoppingCart />
-                <span>Cart</span>
-                {cartItems.length > 0 && (
-                  <Badge pill bg='success' style={{ marginLeft: '5px' }}>
-                    {cartItems.reduce((a, c) => a + c.qty, 0)}
-                  </Badge>
-                )}
+              <Nav.Link as={Link} to='/contact' className='mc-nav-link'>
+                Contact
               </Nav.Link>
-              {userInfo ? (
-                <NavDropdown title={userInfo.name} id='username'>
-                  <NavDropdown.Item as={Link} to='/profile'>
-                    Profile
-                  </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => setShowLogoutConfirm(true)}>
-                    Logout
-                  </NavDropdown.Item>
-                </NavDropdown>
-              ) : (
-                <Nav.Link as={Link} to='/login'>
-                  <FaUser /> Sign In
-                </Nav.Link>
-              )}
             </Nav>
           </Navbar.Collapse>
         </Container>
