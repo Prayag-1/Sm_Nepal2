@@ -1,10 +1,8 @@
-import { Row, Col, Form, Button, Card } from 'react-bootstrap';
+import { Row, Col, Form, Button } from 'react-bootstrap';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useGetProductsQuery } from '../slices/productsApiSlice';
 import Product from '../components/Product';
-import Loader from '../components/Loader';
 import Message from '../components/Message';
-import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import { useGetCategoriesQuery } from '../slices/categoriesApiSlice';
 import { useGetBrandsQuery } from '../slices/brandsApiSlice';
@@ -18,7 +16,7 @@ const HomeScreen = () => {
   const selectedCategory = searchParams.get('category') || '';
   const selectedBrand = searchParams.get('brand') || '';
 
-  const { data, isLoading, error } = useGetProductsQuery({
+  useGetProductsQuery({
     keyword,
     pageNumber,
     category: selectedCategory || undefined,

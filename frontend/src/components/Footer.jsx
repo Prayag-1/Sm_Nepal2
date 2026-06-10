@@ -1,4 +1,4 @@
-﻿import { Container, Row, Col, Image } from "react-bootstrap";
+import { Container, Row, Col, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useGetSettingsQuery } from "../slices/contactApiSlice";
 import { FaWhatsapp, FaEnvelope, FaArrowUp, FaFacebookF, FaInstagram } from "react-icons/fa";

@@ -1,5 +1,5 @@
-import { Navbar, Nav, Container, NavDropdown, Badge, Button } from 'react-bootstrap';
-import { FaShoppingCart, FaUser, FaSearch, FaEnvelope, FaPhoneAlt, FaBars } from 'react-icons/fa';
+import { Navbar, Nav, Container, NavDropdown, Badge } from 'react-bootstrap';
+import { FaShoppingCart, FaUser, FaBars } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLogoutMutation } from '../slices/usersApiSlice';

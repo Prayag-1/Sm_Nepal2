@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import { useGetBrandsQuery } from '../slices/brandsApiSlice';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
